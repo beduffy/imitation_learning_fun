@@ -26,8 +26,10 @@ ROBOT_PORTS = {
 TASK_CONFIG = {
     'dataset_dir': DATA_DIR,
     'episode_len': 300,
-    'state_dim': 5,
-    'action_dim': 5,
+    # 'state_dim': 5,
+    # 'action_dim': 5,
+    'state_dim': 1,
+    'action_dim': 1,
     'cam_width': 640,
     'cam_height': 480,
     'camera_names': ['front'],

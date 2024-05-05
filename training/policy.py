@@ -9,6 +9,7 @@ e = IPython.embed
 class ACTPolicy(nn.Module):
     def __init__(self, args_override):
         super().__init__()
+        print(args_override)
         model, optimizer = build_ACT_model_and_optimizer(args_override)
         self.model = model # CVAE decoder
         self.optimizer = optimizer
@@ -24,6 +25,7 @@ class ACTPolicy(nn.Module):
             actions = actions[:, :self.model.num_queries]
             is_pad = is_pad[:, :self.model.num_queries]
 
+            # import pdb;pdb.set_trace()
             a_hat, is_pad_hat, (mu, logvar) = self.model(qpos, image, env_state, actions, is_pad)
             total_kld, dim_wise_kld, mean_kld = kl_divergence(mu, logvar)
             loss_dict = dict()

@@ -19,6 +19,7 @@ class EpisodicDataset(torch.utils.data.Dataset):
         self.camera_names = camera_names
         self.norm_stats = norm_stats
         self.is_sim = None
+        print(f"Initializing dataset with {len(self.episode_ids)} episodes.")
         #self.__getitem__(0) # initialize self.is_sim
 
     def __len__(self):
