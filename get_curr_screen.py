@@ -9,6 +9,9 @@ from PIL import ImageGrab, ImageDraw
 # capture_specific_monitor(0, 0, 1920, 1080, 'monitor1_screenshot.png')
 # TODO what should the output of DETR/vae/transformer be? pixels to move the mouse? relative or absolute pixels?
 
+
+# TODO could begin with just x of mouse (not y), and no image
+
 def show_screen_live():
     # Continuously capture the screen, display it live, and move the mouse left and right
     move_left = True
