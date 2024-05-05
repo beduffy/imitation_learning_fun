@@ -57,8 +57,10 @@ if __name__ == "__main__":
         action_replay = []
         for i in tqdm(range(cfg['episode_len'])):
             # observation
-            qpos = follower.read_position()
-            qvel = follower.read_velocity()
+            # qpos = follower.read_position()
+            # qvel = follower.read_velocity()
+            qpos = 0
+            qvel = 0
             image = capture_image(cam)
             obs = {
                 'qpos': pwm2pos(qpos),
@@ -66,19 +68,16 @@ if __name__ == "__main__":
                 'images': {cn : image for cn in cfg['camera_names']}
             }
             # action (leader's position)
-            action = leader.read_position()
+            # action = leader.read_position()
+            action = 0
             # apply action
-            follower.set_goal_pos(action)
+            # follower.set_goal_pos(action)
             action = pwm2pos(action)
             # store data
             obs_replay.append(obs)
             action_replay.append(action)
 
         os.system('say "stop"')
-
-        # disable torque
-        #leader._disable_torque()
-        #follower._disable_torque()
 
         # create a dictionary to store the data
         data_dict = {
