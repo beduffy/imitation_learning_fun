@@ -23,6 +23,8 @@ checkpoint_dir = os.path.join(train_cfg['checkpoint_dir'], task)
 # device
 device = os.environ['DEVICE']
 
+# import pdb;pdb.set_trace()
+
 
 def forward_pass(data, policy):
     image_data, qpos_data, action_data, is_pad = data
@@ -68,6 +70,7 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
             policy.eval()
             epoch_dicts = []
             for batch_idx, data in enumerate(val_dataloader):
+                # import pdb;pdb.set_trace()
                 forward_dict = forward_pass(data, policy)
                 epoch_dicts.append(forward_dict)
             epoch_summary = compute_dict_mean(epoch_dicts)
@@ -84,16 +87,30 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
         print(summary_string)
 
         # training
+        print('before train')
         policy.train()
+        print('after train')
         optimizer.zero_grad()
+        print('after optimizer.zero_grad()')
+
+        import pdb;pdb.set_trace()
         for batch_idx, data in enumerate(train_dataloader):
+            print('batch_idx: ', batch_idx)
             forward_dict = forward_pass(data, policy)
             # backward
             loss = forward_dict['loss']
+            # TODO 
+            '''
+            /home/ben/all_projects/imitation_learning_fun/training/policy.py:32: 
+            UserWarning: Using a target size (torch.Size([2, 100, 5])) 
+            that is different to the input size (torch.Size([2, 100, 1])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+            all_l1 = F.l1_loss(actions, a_hat, reduction='none')
+            '''
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
             train_history.append(detach_dict(forward_dict))
+        # import pdb;pdb.set_trace()
         epoch_summary = compute_dict_mean(train_history[(batch_idx+1)*epoch:(batch_idx+1)*(epoch+1)])
         epoch_train_loss = epoch_summary['loss']
         print(f'Train loss: {epoch_train_loss:.5f}')
@@ -116,7 +133,7 @@ if __name__ == '__main__':
     set_seed(train_cfg['seed'])
     # create ckpt dir if not exists
     os.makedirs(checkpoint_dir, exist_ok=True)
-   # number of training episodes
+    # number of training episodes
     data_dir = os.path.join(task_cfg['dataset_dir'], task)
     num_episodes = len(os.listdir(data_dir))
 
