@@ -87,13 +87,11 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
         print(summary_string)
 
         # training
-        print('before train')
         policy.train()
-        print('after train')
         optimizer.zero_grad()
-        print('after optimizer.zero_grad()')
 
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
+        # TODO why does the code get stuck here?!? 
         for batch_idx, data in enumerate(train_dataloader):
             print('batch_idx: ', batch_idx)
             forward_dict = forward_pass(data, policy)
@@ -119,7 +117,7 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
             summary_string += f'{k}: {v.item():.3f} '
         print(summary_string)
 
-        if epoch % 200 == 0:
+        if epoch % 2 == 0:
             ckpt_path = os.path.join(checkpoint_dir, f"policy_epoch_{epoch}_seed_{train_cfg['seed']}.ckpt")
             torch.save(policy.state_dict(), ckpt_path)
             plot_history(train_history, validation_history, epoch, checkpoint_dir, train_cfg['seed'])

@@ -26,11 +26,13 @@ class EpisodicDataset(torch.utils.data.Dataset):
         return len(self.episode_ids)
 
     def __getitem__(self, index):
+        # print('inside getitem')
         sample_full_episode = False # hardcode
 
         episode_id = self.episode_ids[index]
         dataset_path = os.path.join(self.dataset_dir, f'episode_{episode_id}.hdf5')
         with h5py.File(dataset_path, 'r') as root:
+            # print('within with')
             is_sim = root.attrs['sim']
             original_action_shape = root['/action'].shape
             episode_len = original_action_shape[0]
@@ -52,6 +54,7 @@ class EpisodicDataset(torch.utils.data.Dataset):
                 action = root['/action'][max(0, start_ts - 1):] # hack, to make timesteps more aligned
                 action_len = episode_len - max(0, start_ts - 1) # hack, to make timesteps more aligned
 
+        # print('after with')
         self.is_sim = is_sim
         padded_action = np.zeros(original_action_shape, dtype=np.float32)
         padded_action[:action_len] = action
@@ -63,20 +66,36 @@ class EpisodicDataset(torch.utils.data.Dataset):
         for cam_name in self.camera_names:
             all_cam_images.append(image_dict[cam_name])
         all_cam_images = np.stack(all_cam_images, axis=0)
+        # print('after cam loop')
 
         # construct observations
         image_data = torch.from_numpy(all_cam_images)
         qpos_data = torch.from_numpy(qpos).float()
         action_data = torch.from_numpy(padded_action).float()
         is_pad = torch.from_numpy(is_pad).bool()
+        # print('after is_pad')
 
         # channel last
         image_data = torch.einsum('k h w c -> k c h w', image_data)
+        # print('after einsum')
+
 
         # normalize image and change dtype to float
         image_data = image_data / 255.0
-        action_data = (action_data - self.norm_stats["action_mean"]) / self.norm_stats["action_std"]
-        qpos_data = (qpos_data - self.norm_stats["qpos_mean"]) / self.norm_stats["qpos_std"]
+        # print('before action_data')
+        # print(action_data)
+        # print(self.norm_stats)
+        # import pdb;pdb.set_trace()
+
+        epsilon = 1e-6  # Small constant to prevent division by zero
+
+        # TODO ahhhh action data was all the same hence why std was so low and then causing massive division
+
+        # action_data = (action_data - self.norm_stats["action_mean"]) / self.norm_stats["action_std"]
+        # action_data = (action_data - self.norm_stats["action_mean"]) / (self.norm_stats["action_std"] + epsilon)
+        # print('after action_data')
+        # qpos_data = (qpos_data - self.norm_stats["qpos_mean"]) / self.norm_stats["qpos_std"]
+        # print('after qpos_data')
 
         return image_data, qpos_data, action_data, is_pad
 
@@ -127,6 +146,10 @@ def load_data(dataset_dir, num_episodes, camera_names, batch_size_train, batch_s
     # construct dataset and dataloader
     train_dataset = EpisodicDataset(train_indices, dataset_dir, camera_names, norm_stats)
     val_dataset = EpisodicDataset(val_indices, dataset_dir, camera_names, norm_stats)
+    # train_dataloader = DataLoader(train_dataset, batch_size=batch_size_train, shuffle=True, pin_memory=True, num_workers=1, prefetch_factor=1)
+    # val_dataloader = DataLoader(val_dataset, batch_size=batch_size_val, shuffle=True, pin_memory=True, num_workers=1, prefetch_factor=1)
+
+    print('batch_size_train', batch_size_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size_train, shuffle=True, pin_memory=True, num_workers=1, prefetch_factor=1)
     val_dataloader = DataLoader(val_dataset, batch_size=batch_size_val, shuffle=True, pin_memory=True, num_workers=1, prefetch_factor=1)
 
