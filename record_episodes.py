@@ -6,6 +6,7 @@ import argparse
 from tqdm import tqdm
 from time import sleep, time
 from training.utils import pwm2pos, pwm2vel
+import numpy as np
 
 from robot import Robot
 
@@ -28,39 +29,28 @@ cfg = TASK_CONFIG
 
 
 def capture_image(cam):
-    # Capture a single frame
-    _, frame = cam.read()
-    # Generate a unique filename with the current date and time
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    # Define your crop coordinates (top left corner and bottom right corner)
-    x1, y1 = 400, 0  # Example starting coordinates (top left of the crop rectangle)
-    x2, y2 = 1600, 900  # Example ending coordinates (bottom right of the crop rectangle)
-    # Crop the image
-    image = image[y1:y2, x1:x2]
-    # Resize the image
-    image = cv2.resize(image, (cfg['cam_width'], cfg['cam_height']), interpolation=cv2.INTER_AREA)
+    # # Capture a single frame
+    # _, frame = cam.read()
+    # # Generate a unique filename with the current date and time
+    # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # # Define your crop coordinates (top left corner and bottom right corner)
+    # x1, y1 = 400, 0  # Example starting coordinates (top left of the crop rectangle)
+    # x2, y2 = 1600, 900  # Example ending coordinates (bottom right of the crop rectangle)
+    # # Crop the image
+    # image = image[y1:y2, x1:x2]
+    # # Resize the image
+    # image = cv2.resize(image, (cfg['cam_width'], cfg['cam_height']), interpolation=cv2.INTER_AREA)
+
+    # Create a completely black image with the specified dimensions from the configuration
+    image = np.zeros((cfg['cam_height'], cfg['cam_width'], 3), dtype=np.uint8)
 
     return image
 
 
 if __name__ == "__main__":
-    # init camera
-    cam = cv2.VideoCapture(cfg['camera_port'])
-    # Check if the camera opened successfully
-    if not cam.isOpened():
-        raise IOError("Cannot open camera")
-    # init follower
-    follower = Robot(device_name=ROBOT_PORTS['follower'])
-    # init leader
-    leader = Robot(device_name=ROBOT_PORTS['leader'])
-    leader.set_trigger_torque()
-
+    cam = None
     
     for i in range(num_episodes):
-        # bring the follower to the leader and start camera
-        for i in range(200):
-            follower.set_goal_pos(leader.read_position())
-            _ = capture_image(cam)
         os.system('say "go"')
         # init buffers
         obs_replay = []
@@ -132,6 +122,3 @@ if __name__ == "__main__":
             
             for name, array in data_dict.items():
                 root[name][...] = array
-    
-    leader._disable_torque()
-    follower._disable_torque()
