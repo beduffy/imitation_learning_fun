@@ -59,8 +59,8 @@ if __name__ == "__main__":
             # observation
             # qpos = follower.read_position()
             # qvel = follower.read_velocity()
-            qpos = 0
-            qvel = 0
+            qpos = np.array([0])
+            qvel = np.array([0])
             image = capture_image(cam)
             obs = {
                 'qpos': pwm2pos(qpos),
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             }
             # action (leader's position)
             # action = leader.read_position()
-            action = 0
+            action = np.array([0])
             # apply action
             # follower.set_goal_pos(action)
             action = pwm2pos(action)
