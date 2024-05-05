@@ -98,6 +98,9 @@ if __name__ == "__main__":
             for cam_name in cfg['camera_names']:
                 data_dict[f'/observations/images/{cam_name}'].append(o['images'][cam_name])
 
+        # import pdb;pdb.set_trace()
+        print(action_replay)
+
         t0 = time()
         max_timesteps = len(data_dict['/observations/qpos'])
         # create data dir if it doesn't exist
