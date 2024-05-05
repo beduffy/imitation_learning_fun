@@ -52,23 +52,3 @@ def show_screen_live():
 
 # Usage
 show_screen_live()
-
-
-# import pyautogui
-
-# def capture_screen_with_cursor(filename='screenshot_with_cursor.png'):
-#     # Capture the screen
-#     screenshot = ImageGrab.grab()
-#     # Get the current position of the mouse
-#     x, y = pyautogui.position()
-#     # Create a drawing context
-#     draw = ImageDraw.Draw(screenshot)
-#     # Define the size of the cursor
-#     cursor_size = 10
-#     # Draw the cursor as a red circle
-#     draw.ellipse((x - cursor_size, y - cursor_size, x + cursor_size, y + cursor_size), fill='red')
-#     # Save the image file with the cursor
-#     screenshot.save(filename)
-
-# # Usage
-# capture_screen_with_cursor('my_screenshot_with_cursor.png')
