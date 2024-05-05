@@ -19,6 +19,13 @@ num_episodes = args.num_episodes
 
 cfg = TASK_CONFIG
 
+# TODO beginning fork. First I would like transformer to copy some stupid simple text or actions,
+# record, train and evaluate. Need to change all scripts. Even if scripted policies. 
+# Then I will make harder and copy keyboard/mouse movements or something like this
+# Only then do we move to robotics e.g. servo with stick which points towards red thing or create3 moving to certain item.
+# Then we can start with more complex stuff e.g. 2 servos and then 5 servos
+
+
 
 def capture_image(cam):
     # Capture a single frame
