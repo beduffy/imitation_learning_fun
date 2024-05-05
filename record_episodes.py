@@ -73,6 +73,7 @@ if __name__ == "__main__":
             # apply action
             # follower.set_goal_pos(action)
             action = pwm2pos(action)
+            print('outputted action: ', action)
             # store data
             obs_replay.append(obs)
             action_replay.append(action)

@@ -25,31 +25,29 @@ device = os.environ['DEVICE']
 
 
 def capture_image(cam):
-    # Capture a single frame
-    _, frame = cam.read()
-    # Generate a unique filename with the current date and time
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    # Define your crop coordinates (top left corner and bottom right corner)
-    x1, y1 = 400, 0  # Example starting coordinates (top left of the crop rectangle)
-    x2, y2 = 1600, 900  # Example ending coordinates (bottom right of the crop rectangle)
-    # Crop the image
-    image = image[y1:y2, x1:x2]
-    # Resize the image
-    image = cv2.resize(image, (cfg['cam_width'], cfg['cam_height']), interpolation=cv2.INTER_AREA)
+    # # Capture a single frame
+    # _, frame = cam.read()
+    # # Generate a unique filename with the current date and time
+    # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # # Define your crop coordinates (top left corner and bottom right corner)
+    # x1, y1 = 400, 0  # Example starting coordinates (top left of the crop rectangle)
+    # x2, y2 = 1600, 900  # Example ending coordinates (bottom right of the crop rectangle)
+    # # Crop the image
+    # image = image[y1:y2, x1:x2]
+    # # Resize the image
+    # image = cv2.resize(image, (cfg['cam_width'], cfg['cam_height']), interpolation=cv2.INTER_AREA)
+
+    # Create a completely black image with the specified dimensions from the configuration
+    image = np.zeros((cfg['cam_height'], cfg['cam_width'], 3), dtype=np.uint8)
 
     return image
 
 if __name__ == "__main__":
-    # init camera
-    cam = cv2.VideoCapture(cfg['camera_port'])
-    # Check if the camera opened successfully
-    if not cam.isOpened():
-        raise IOError("Cannot open camera")
-    # init follower
-    follower = Robot(device_name=ROBOT_PORTS['follower'])
+    cam = None
 
     # load the policy
-    ckpt_path = os.path.join(train_cfg['checkpoint_dir'], train_cfg['eval_ckpt_name'])
+    # ckpt_path = os.path.join(train_cfg['checkpoint_dir'], train_cfg['eval_ckpt_name'])
+    ckpt_path = os.path.join(train_cfg['checkpoint_dir'], args.task, train_cfg['eval_ckpt_name'])
     policy = make_policy(policy_config['policy_class'], policy_config)
     loading_status = policy.load_state_dict(torch.load(ckpt_path, map_location=torch.device(device)))
     print(loading_status)
@@ -57,7 +55,7 @@ if __name__ == "__main__":
     policy.eval()
 
     print(f'Loaded: {ckpt_path}')
-    stats_path = os.path.join(train_cfg['checkpoint_dir'], f'dataset_stats.pkl')
+    stats_path = os.path.join(train_cfg['checkpoint_dir'], args.task, f'dataset_stats.pkl')
     with open(stats_path, 'rb') as f:
         stats = pickle.load(f)
 
@@ -68,15 +66,12 @@ if __name__ == "__main__":
     if policy_config['temporal_agg']:
         query_frequency = 1
         num_queries = policy_config['num_queries']
-
-    # bring the follower to the leader
-    for i in range(90):
-        follower.read_position()
-        _ = capture_image(cam)
     
     obs = {
-        'qpos': pwm2pos(follower.read_position()),
-        'qvel': vel2pwm(follower.read_velocity()),
+        # 'qpos': pwm2pos(follower.read_position()),
+        # 'qvel': vel2pwm(follower.read_velocity()),
+        'qpos': pwm2pos(np.array([0])),
+        'qvel': vel2pwm(np.array([0])),
         'images': {cn: capture_image(cam) for cn in cfg['camera_names']}
     }
     os.system('say "start"')
@@ -98,6 +93,7 @@ if __name__ == "__main__":
                 qpos_history[:, t] = qpos
                 curr_image = get_image(obs['images'], cfg['camera_names'], device)
 
+                # import pdb;pdb.set_trace()
                 if t % query_frequency == 0:
                     all_actions = policy(qpos, curr_image)
                 if policy_config['temporal_agg']:
@@ -117,13 +113,14 @@ if __name__ == "__main__":
                 raw_action = raw_action.squeeze(0).cpu().numpy()
                 action = post_process(raw_action)
                 action = pos2pwm(action).astype(int)
+                print('OUTPUTTED ACTION: ', action, 'raw_action: ', raw_action)
                 ### take action
-                follower.set_goal_pos(action)
+                # follower.set_goal_pos(action)
 
                 ### update obs
                 obs = {
-                    'qpos': pwm2pos(follower.read_position()),
-                    'qvel': vel2pwm(follower.read_velocity()),
+                    'qpos': pwm2pos(np.array([0])),
+                    'qvel': vel2pwm(np.array([0])),
                     'images': {cn: capture_image(cam) for cn in cfg['camera_names']}
                 }
                 ### store data
@@ -174,6 +171,3 @@ if __name__ == "__main__":
             
             for name, array in data_dict.items():
                 root[name][...] = array
-    
-    # disable torque
-    follower._disable_torque()
