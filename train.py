@@ -23,8 +23,6 @@ checkpoint_dir = os.path.join(train_cfg['checkpoint_dir'], task)
 # device
 device = os.environ['DEVICE']
 
-# import pdb;pdb.set_trace()
-
 
 def forward_pass(data, policy):
     image_data, qpos_data, action_data, is_pad = data
@@ -70,7 +68,6 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
             policy.eval()
             epoch_dicts = []
             for batch_idx, data in enumerate(val_dataloader):
-                # import pdb;pdb.set_trace()
                 forward_dict = forward_pass(data, policy)
                 epoch_dicts.append(forward_dict)
             epoch_summary = compute_dict_mean(epoch_dicts)
@@ -90,11 +87,14 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
         policy.train()
         optimizer.zero_grad()
 
-        # import pdb;pdb.set_trace()
-        # TODO why does the code get stuck here?!? 
         for batch_idx, data in enumerate(train_dataloader):
             print('batch_idx: ', batch_idx)
             forward_dict = forward_pass(data, policy)
+            # import pdb;pdb.set_trace()
+            
+            '''(Pdb) forward_dict
+{'l1': tensor(2.5544, grad_fn=<MeanBackward0>), 'kl': tensor(11.8251, grad_fn=<SelectBackward0>), 'loss': tensor(120.8051, grad_fn=<AddBackward0>)}
+            '''
             # backward
             loss = forward_dict['loss']
             # TODO 
@@ -108,7 +108,7 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
             optimizer.step()
             optimizer.zero_grad()
             train_history.append(detach_dict(forward_dict))
-        # import pdb;pdb.set_trace()
+
         epoch_summary = compute_dict_mean(train_history[(batch_idx+1)*epoch:(batch_idx+1)*(epoch+1)])
         epoch_train_loss = epoch_summary['loss']
         print(f'Train loss: {epoch_train_loss:.5f}')
@@ -118,9 +118,10 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
         print(summary_string)
 
         if epoch % 2 == 0:
-            ckpt_path = os.path.join(checkpoint_dir, f"policy_epoch_{epoch}_seed_{train_cfg['seed']}.ckpt")
-            torch.save(policy.state_dict(), ckpt_path)
             plot_history(train_history, validation_history, epoch, checkpoint_dir, train_cfg['seed'])
+            if epoch % 10 == 0:
+                ckpt_path = os.path.join(checkpoint_dir, f"policy_epoch_{epoch}_seed_{train_cfg['seed']}.ckpt")
+                torch.save(policy.state_dict(), ckpt_path)
 
     ckpt_path = os.path.join(checkpoint_dir, f'policy_last.ckpt')
     torch.save(policy.state_dict(), ckpt_path)
