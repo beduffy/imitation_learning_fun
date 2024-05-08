@@ -59,8 +59,10 @@ if __name__ == "__main__":
             # observation
             # qpos = follower.read_position()
             # qvel = follower.read_velocity()
-            qpos = np.array([501])
-            qvel = np.array([501])
+            # qpos = np.array([501])
+            # qvel = np.array([501])
+            qpos = np.array([501 + np.random.normal(0, 1)])  # Small noise around 501
+            qvel = np.array([501 + np.random.normal(0, 1)])
             image = capture_image(cam)
             obs = {
                 'qpos': qpos,
@@ -69,7 +71,11 @@ if __name__ == "__main__":
             }
             # action (leader's position)
             # action = leader.read_position()
-            action = np.array([501])
+            # action = np.array([501])
+
+            
+            action = np.array([501 + np.random.normal(0, 1)])
+
             # apply action
             # follower.set_goal_pos(action)
             # action = pwm2pos(action)
