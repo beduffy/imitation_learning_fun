@@ -32,6 +32,7 @@ class EpisodicDataset(torch.utils.data.Dataset):
         episode_id = self.episode_ids[index]
         dataset_path = os.path.join(self.dataset_dir, f'episode_{episode_id}.hdf5')
         with h5py.File(dataset_path, 'r') as root:
+            # TODO what if storing numpy array is the wrong way?
             # print('within with')
             is_sim = root.attrs['sim']
             original_action_shape = root['/action'].shape

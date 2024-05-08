@@ -29,6 +29,16 @@ def forward_pass(data, policy):
     image_data, qpos_data, action_data, is_pad = image_data.to(device), qpos_data.to(device), action_data.to(device), is_pad.to(device)
     return policy(qpos_data, image_data, action_data, is_pad) # TODO remove None
 
+def forward_pass_extra(data, policy):
+    image_data, qpos_data, action_data, is_pad = data
+    image_data, qpos_data, action_data, is_pad = image_data.to(device), qpos_data.to(device), action_data.to(device), is_pad.to(device)
+    
+    # Perform the forward pass
+    output = policy(qpos_data, image_data, action_data, is_pad)
+    
+    # Return both inputs and outputs
+    return {'inputs': (image_data, qpos_data, action_data, is_pad), 'outputs': output}
+
 def plot_history(train_history, validation_history, num_epochs, ckpt_dir, seed):
     # save training curves
     for key in train_history[0]:
@@ -90,7 +100,22 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
         for batch_idx, data in enumerate(train_dataloader):
             print('batch_idx: ', batch_idx)
             forward_dict = forward_pass(data, policy)
-            # import pdb;pdb.set_trace()
+            import pdb;pdb.set_trace()
+            result = forward_pass_extra(data, policy)
+            inputs, outputs = result['inputs'], result['outputs']
+    
+
+            # Print inputs and outputs
+            print(f"Batch {batch_idx}:")
+            print("Inputs:")
+            # print("Image Data:", inputs[0])
+            print("Qpos Data:", inputs[1])
+            print("Action Data (Ground Truth):", inputs[2])
+            # print("Is Padding:", inputs[3])
+            print("Outputs:", outputs)
+            import pdb;pdb.set_trace()
+
+            
             
             '''(Pdb) forward_dict
 {'l1': tensor(2.5544, grad_fn=<MeanBackward0>), 'kl': tensor(11.8251, grad_fn=<SelectBackward0>), 'loss': tensor(120.8051, grad_fn=<AddBackward0>)}
