@@ -117,14 +117,11 @@ def train_bc(train_dataloader, val_dataloader, policy_config):
             summary_string += f'{k}: {v.item():.3f} '
         print(summary_string)
 
-        if epoch % 2 == 0:
-            ckpt_path = os.path.join(checkpoint_dir, f"policy_epoch_{epoch}_seed_{train_cfg['seed']}.ckpt")
-            torch.save(policy.state_dict(), ckpt_path)
+        if best_ckpt_info and epoch_val_loss == min_val_loss:  # TODO fishy
             plot_history(train_history, validation_history, epoch, checkpoint_dir, train_cfg['seed'])
-
-    ckpt_path = os.path.join(checkpoint_dir, f'policy_last.ckpt')
-    torch.save(policy.state_dict(), ckpt_path)
-    
+            ckpt_path = os.path.join(checkpoint_dir, 'last_policy.ckpt')
+            torch.save(best_ckpt_info[2], ckpt_path)
+            print(f'Saved best model to {ckpt_path}')
 
 if __name__ == '__main__':
     # set seed
