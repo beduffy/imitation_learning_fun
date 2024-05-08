@@ -69,7 +69,8 @@ if __name__ == "__main__":
             }
             # action (leader's position)
             # action = leader.read_position()
-            action = np.array([0])
+            # action = np.array([0])
+            action = np.array([-4000])
             # apply action
             # follower.set_goal_pos(action)
             action = pwm2pos(action)
