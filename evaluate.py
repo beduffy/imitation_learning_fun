@@ -70,8 +70,8 @@ if __name__ == "__main__":
     obs = {
         # 'qpos': pwm2pos(follower.read_position()),
         # 'qvel': vel2pwm(follower.read_velocity()),
-        'qpos': pwm2pos(np.array([0])),
-        'qvel': vel2pwm(np.array([0])),
+        'qpos': np.array([0]),
+        'qvel': np.array([0]),
         'images': {cn: capture_image(cam) for cn in cfg['camera_names']}
     }
     os.system('say "start"')
@@ -111,16 +111,17 @@ if __name__ == "__main__":
 
                 ### post-process actions
                 raw_action = raw_action.squeeze(0).cpu().numpy()
-                action = post_process(raw_action)
-                action = pos2pwm(action).astype(int)
+                # action = post_process(raw_action)
+                action = raw_action
+                # action = pos2pwm(action).astype(int)
                 print('OUTPUTTED ACTION: ', action, 'raw_action: ', raw_action)
                 ### take action
                 # follower.set_goal_pos(action)
 
                 ### update obs
                 obs = {
-                    'qpos': pwm2pos(np.array([0])),
-                    'qvel': vel2pwm(np.array([0])),
+                    'qpos': np.array([501]),
+                    'qvel': np.array([501]),
                     'images': {cn: capture_image(cam) for cn in cfg['camera_names']}
                 }
                 ### store data

@@ -59,20 +59,20 @@ if __name__ == "__main__":
             # observation
             # qpos = follower.read_position()
             # qvel = follower.read_velocity()
-            qpos = np.array([0])
-            qvel = np.array([0])
+            qpos = np.array([501])
+            qvel = np.array([501])
             image = capture_image(cam)
             obs = {
-                'qpos': pwm2pos(qpos),
-                'qvel': pwm2vel(qvel),
+                'qpos': qpos,
+                'qvel': qvel,
                 'images': {cn : image for cn in cfg['camera_names']}
             }
             # action (leader's position)
             # action = leader.read_position()
-            action = np.array([0])
+            action = np.array([501])
             # apply action
             # follower.set_goal_pos(action)
-            action = pwm2pos(action)
+            # action = pwm2pos(action)
             print('outputted action: ', action)
             # store data
             obs_replay.append(obs)
