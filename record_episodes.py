@@ -28,7 +28,7 @@ cfg = TASK_CONFIG
 
 
 
-def capture_image(cam):
+def capture_image(cam, loop_index):
     # # Capture a single frame
     # _, frame = cam.read()
     # # Generate a unique filename with the current date and time
@@ -43,6 +43,21 @@ def capture_image(cam):
 
     # Create a completely black image with the specified dimensions from the configuration
     image = np.zeros((cfg['cam_height'], cfg['cam_width'], 3), dtype=np.uint8)
+
+    if loop_index < 150:
+        # Draw a red circle on the left side of the image
+        center_coordinates = (int(cfg['cam_width'] * 0.25), int(cfg['cam_height'] / 2))
+        radius = 50
+        color = (0, 0, 255)  # Red in BGR
+        thickness = -1  # Solid fill
+        image = cv2.circle(image, center_coordinates, radius, color, thickness)
+    else:
+        # Draw a green circle on the right side of the image
+        center_coordinates = (int(cfg['cam_width'] * 0.75), int(cfg['cam_height'] / 2))
+        radius = 50
+        color = (0, 255, 0)  # Green in BGR
+        thickness = -1  # Solid fill
+        image = cv2.circle(image, center_coordinates, radius, color, thickness)
 
     return image
 
@@ -63,7 +78,7 @@ if __name__ == "__main__":
             # qvel = np.array([0])
             qpos = np.array([i])
             qvel = np.array([i])
-            image = capture_image(cam)
+            image = capture_image(cam, loop_index=i)
             obs = {
                 # 'qpos': pwm2pos(qpos),
                 # 'qvel': pwm2vel(qvel),
@@ -73,7 +88,11 @@ if __name__ == "__main__":
             }
             # action (leader's position)
             # action = leader.read_position()
-            action = np.array([i])
+            # action = np.array([i])
+            if i < 150:
+                action = np.array([0])
+            else:
+                action = np.array([1])
             # apply action
             # follower.set_goal_pos(action)
             # action = pwm2pos(action)
